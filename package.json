@@ -10,9 +10,9 @@
     "seed": "node scripts/seed-demo.mjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": "22.x"
   },
   "dependencies": {
-    "@vercel/blob": "latest"
+    "@vercel/blob": "^2.8.2"
   }
 }
