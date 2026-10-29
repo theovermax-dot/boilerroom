@@ -90,9 +90,14 @@ const msg = (chatId, text, extra = {}) => ({
   update_id: mid++,
   message: { message_id: mid++, chat: { id: chatId, type: 'private' }, from: { id: chatId, first_name: 'Гость', username: 'guest' }, text, ...extra },
 });
-const cb = (chatId, data, messageId = 9) => ({
+const cb = (chatId, data, messageId = 9, isPhoto = false) => ({
   update_id: mid++,
-  callback_query: { id: 'cb', from: { id: chatId, first_name: 'Гость' }, data, message: { message_id: messageId, chat: { id: chatId } } },
+  callback_query: {
+    id: 'cb',
+    from: { id: chatId, first_name: 'Гость' },
+    data,
+    message: { message_id: messageId, chat: { id: chatId }, ...(isPhoto ? { photo: [{ file_id: 'x' }] } : {}) },
+  },
 });
 
 function setup(nowIso = '2026-10-29T10:00:00Z', tgOpts) {
@@ -354,13 +359,15 @@ test('меню: 64 позиции, разделы, карточки, возвр�
   // «🍽 Меню» на карточке с фото → новое сообщение с разделами, карточка удаляется
   await s.run(cb(GUEST, 'mi:0.0'));
   const card = s.last(GUEST);
-  await s.run(cb(GUEST, 'mn', card.message_id));
+  const editsBefore = s.tg.log.filter((x) => x.kind === 'edit').length;
+  await s.run(cb(GUEST, 'mn', card.message_id, true));
+  assert.equal(s.tg.log.filter((x) => x.kind === 'edit').length, editsBefore, 'карточку с фото не пытаемся редактировать');
   assert.ok(s.last(GUEST).text.includes('Меню BOILER ROOM'));
   assert.ok(s.tg.log.some((x) => x.method === 'deleteMessage' && x.body.message_id === card.message_id));
   // «⬅️ Раздел» на карточке
   await s.run(cb(GUEST, 'mi:2.1'));
   const card2 = s.last(GUEST);
-  await s.run(cb(GUEST, 'mc:2', card2.message_id));
+  await s.run(cb(GUEST, 'mc:2', card2.message_id, true));
   assert.ok(s.last(GUEST).text.includes(MENU[2].title));
   // «Все разделы» в текстовом сообщении редактирует его на месте
   const catMsg = s.last(GUEST);
