@@ -1,0 +1,20 @@
+# Бесплатный планировщик напоминаний: каждые 10 минут дергает /api/cron на Vercel.
+name: reminders
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run reminders
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -fsS -X GET "$APP_URL/api/cron" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 50

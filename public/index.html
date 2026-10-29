@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BOILER ROOM Batumi — бронь столов в Telegram</title>
+  <meta name="description" content="Забронируйте стол на футбол, UFC и бокс в Telegram. Без звонков.">
+  <style>
+    :root { --bg:#0a0a0c; --fg:#f4f4f5; --muted:#a1a1aa; --accent:#ff6020; --card:#141418; --line:#26262e; }
+    @media (prefers-color-scheme: light) { :root { --bg:#0a0a0c; } }
+    * { box-sizing: border-box; }
+    html, body { margin:0; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    body { min-height:100vh; display:flex; flex-direction:column; }
+    header { padding:24px 20px 0; display:flex; justify-content:space-between; align-items:center; }
+    .brand { font-weight:800; letter-spacing:.08em; font-size:18px; }
+    .brand span { color:var(--accent); }
+    main { flex:1; display:grid; place-items:center; padding:40px 20px 64px; }
+    .wrap { width:100%; max-width:920px; display:grid; gap:40px; grid-template-columns: 1.1fr .9fr; align-items:center; }
+    h1 { font-size:clamp(34px, 6vw, 60px); line-height:1.02; margin:0 0 18px; letter-spacing:-.02em; }
+    h1 em { font-style:normal; color:var(--accent); }
+    p.lead { color:var(--muted); font-size:18px; line-height:1.55; margin:0 0 28px; }
+    .cta { display:inline-flex; align-items:center; gap:10px; background:var(--accent); color:#0a0a0c; font-weight:700; padding:16px 26px; border-radius:14px; text-decoration:none; font-size:17px; }
+    .cta:hover { filter:brightness(1.08); }
+    .steps { list-style:none; padding:0; margin:36px 0 0; display:grid; gap:14px; }
+    .steps li { display:flex; gap:14px; align-items:flex-start; color:var(--muted); line-height:1.5; }
+    .steps b { color:var(--fg); }
+    .num { flex:0 0 28px; height:28px; border-radius:50%; background:var(--card); border:1px solid var(--line); display:grid; place-items:center; font-size:13px; color:var(--accent); font-weight:700; }
+    .phone { background:var(--card); border:1px solid var(--line); border-radius:28px; padding:14px; box-shadow:0 30px 80px rgba(255,96,32,.12); }
+    .phone img { width:100%; border-radius:18px; display:block; }
+    .phone .caption { padding:14px 8px 6px; color:var(--muted); font-size:14px; }
+    footer { padding:0 20px 28px; color:var(--muted); font-size:13px; text-align:center; }
+    @media (max-width: 760px) { .wrap { grid-template-columns: 1fr; gap:28px; } .phone { max-width:340px; margin:0 auto; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">BOILER <span>ROOM</span> · BATUMI</div>
+  </header>
+  <main>
+    <div class="wrap">
+      <section>
+        <h1>Стол на матч — <em>в пару нажатий</em></h1>
+        <p class="lead">Футбол, UFC и бокс на большом экране. Выберите трансляцию и гостей прямо в Telegram — администратор подтвердит бронь, а за час до начала вам придёт напоминание.</p>
+        <a class="cta" id="botlink" href="#">Открыть бота в Telegram →</a>
+        <ol class="steps">
+          <li><span class="num">1</span><span><b>Выберите трансляцию</b> из афиши — бой, матч или вечеринку.</span></li>
+          <li><span class="num">2</span><span><b>Укажите гостей и имя</b> и оставьте номер телефона.</span></li>
+          <li><span class="num">3</span><span><b>Получите подтверждение</b> и напоминание за час до начала.</span></li>
+        </ol>
+      </section>
+      <aside class="phone" aria-label="Пример приветствия бота">
+        <img src="/img/welcome.jpg" alt="BOILER ROOM Batumi — футбол, UFC, бокс">
+        <div class="caption">Бот BOILER ROOM Batumi: афиша, бронь столов и акции.</div>
+      </aside>
+    </div>
+  </main>
+  <footer>Бронь через Telegram-бота · Батуми</footer>
+  <script>
+    // Имя бота без @ — впишите свое после создания через @BotFather
+    var BOT_USERNAME = 'TODO_bot_username';
+    document.getElementById('botlink').href = 'https://t.me/' + BOT_USERNAME;
+  </script>
+</body>
+</html>
