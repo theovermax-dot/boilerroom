@@ -55,9 +55,7 @@ test('гость бронирует, админ подтверждает, гос
 
   // Админ создаёт трансляцию
   await handleUpdate(cb(ADMIN, 'adm:ev'), ctx);
-  await handleUpdate(msg(ADMIN, 'UFC — главный бой'), ctx);
-  await handleUpdate(msg(ADMIN, '01.11 21:00'), ctx);
-  await handleUpdate(msg(ADMIN, '⏭ Без фото'), ctx);
+  await handleUpdate(msg(ADMIN, 'UFC — главный бой, 01.11 21:00'), ctx);
   const events = await store.get('events');
   assert.equal(events.length, 1);
   const eventId = events[0].id;
@@ -164,4 +162,48 @@ test('вход админа по коду, неверный код не рабо
 
   await handleUpdate(msg(GUEST, '/admin'), ctx);
   assert.ok(tg.log.some((x) => x.text === 'Админ-панель'), 'после входа панель доступна');
+});
+
+test('трансляция одним сообщением: текст, фото с подписью, «завтра», быстрый путь без кнопки', async () => {
+  const store = memStore();
+  const tg = fakeTg();
+  const now = new Date('2026-10-29T10:00:00Z'); // 14:00 по Батуми
+  const ctx = makeCtx(now, tg, store);
+
+  // 1. Через кнопку, фото приходит с подписью
+  await handleUpdate(cb(ADMIN, 'adm:ev'), ctx);
+  await handleUpdate(msg(ADMIN, '', { caption: 'Барселона — Реал 01.11 21:00', photo: [{ file_id: 'small' }, { file_id: 'BIG' }] }), ctx);
+  // 2. «завтра» без кнопки
+  await handleUpdate(msg(ADMIN, 'UFC главный бой завтра 23:00'), ctx);
+  // 3. фото отдельно, потом текст
+  await handleUpdate(cb(ADMIN, 'adm:ev'), ctx);
+  await handleUpdate(msg(ADMIN, '', { photo: [{ file_id: 'POSTER' }] }), ctx);
+  await handleUpdate(msg(ADMIN, 'Бокс, 02.11 20:30'), ctx);
+
+  const events = (await store.get('events')).sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  assert.equal(events.length, 3);
+  const byTitle = Object.fromEntries(events.map((e) => [e.title, e]));
+  assert.equal(byTitle['Барселона — Реал'].photo, 'BIG');
+  assert.equal(byTitle['Барселона — Реал'].startsAt, '2026-11-01T17:00:00.000Z');
+  assert.equal(byTitle['UFC главный бой'].startsAt, '2026-10-30T19:00:00.000Z');
+  assert.equal(byTitle['Бокс'].photo, 'POSTER');
+});
+
+test('трансляция одним сообщением: понятные ошибки и обычный гость не может создавать', async () => {
+  const store = memStore();
+  const tg = fakeTg();
+  const now = new Date('2026-10-29T10:00:00Z');
+  const ctx = makeCtx(now, tg, store);
+
+  await handleUpdate(cb(ADMIN, 'adm:ev'), ctx);
+  await handleUpdate(msg(ADMIN, 'Просто название'), ctx);
+  assert.ok(tg.log.some((x) => x.text.includes('Не нашёл дату')));
+  await handleUpdate(msg(ADMIN, 'Матч 31.02 21:00'), ctx);
+  assert.ok(tg.log.some((x) => x.text.includes('нет в календаре')));
+  await handleUpdate(msg(ADMIN, '01.11 21:00'), ctx);
+  assert.ok(tg.log.some((x) => x.text.includes('Не хватает названия')));
+  assert.equal((await store.get('events', [])).length, 0);
+
+  await handleUpdate(msg(GUEST, 'Барселона — Реал 01.11 21:00'), ctx);
+  assert.equal((await store.get('events', [])).length, 0, 'гость трансляции не создаёт');
 });
