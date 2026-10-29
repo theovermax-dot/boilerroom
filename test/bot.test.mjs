@@ -146,3 +146,22 @@ test('телефон в неверном формате не принимает�
   assert.equal(await store.get('bookings', []).then((b) => b.length), 0);
   assert.ok(tg.log.some((x) => x.text.includes('номер введён неверно')));
 });
+
+test('вход админа по коду, неверный код не работает, сообщение с кодом удаляется', async () => {
+  const store = memStore();
+  const tg = fakeTg();
+  tg.call = async (method) => { tg.log.push({ kind: 'call', chatId: 0, text: method }); return true; };
+  const codeEnv = { ...env, ADMIN_CHAT_IDS: '', ADMIN_CODE: 'secret42' };
+  const ctx = { tg, store, env: codeEnv, now: new Date() };
+
+  await handleUpdate(msg(GUEST, '/admin wrong'), ctx);
+  assert.deepEqual(await store.get('admins', []), []);
+  assert.ok(tg.log.some((x) => x.text === 'Неверный код.'));
+
+  await handleUpdate(msg(GUEST, '/admin secret42'), ctx);
+  assert.deepEqual(await store.get('admins', []), [GUEST]);
+  assert.ok(tg.log.some((x) => x.text === 'deleteMessage'));
+
+  await handleUpdate(msg(GUEST, '/admin'), ctx);
+  assert.ok(tg.log.some((x) => x.text === 'Админ-панель'), 'после входа панель доступна');
+});

@@ -17,8 +17,6 @@ export default async function handler(req, res) {
       tg: createTelegram(process.env.TELEGRAM_BOT_TOKEN),
       store: createStore(),
       env: process.env,
-      isAdmin: (chatId) =>
-        (process.env.ADMIN_CHAT_IDS || '').split(',').map((s) => s.trim()).includes(String(chatId)),
     });
   } catch (err) {
     // Telegram повторяет неподтверждённые апдейты, поэтому отвечаем 200 и логируем
