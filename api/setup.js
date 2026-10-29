@@ -1,6 +1,7 @@
 // Одноразовая настройка вебхука с сервера Vercel.
 // Вызов: GET /api/setup?key=<CRON_SECRET>
 import { createTelegram } from '../lib/telegram.js';
+import { createStore } from '../lib/store.js';
 
 export default async function handler(req, res) {
   const expected = process.env.CRON_SECRET;
@@ -33,9 +34,6 @@ export default async function handler(req, res) {
     webhookUrl: info ? info.url : null,
     pending: info ? info.pending_update_count : null,
     lastError: info ? info.last_error_message || null : null,
-    storage: Boolean(
-      (process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL) &&
-        (process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN),
-    ),
+    storage: createStore().kind,
   });
 }
