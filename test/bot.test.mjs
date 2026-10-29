@@ -207,3 +207,31 @@ test('трансляция одним сообщением: понятные о�
   await handleUpdate(msg(GUEST, 'Барселона — Реал 01.11 21:00'), ctx);
   assert.equal((await store.get('events', [])).length, 0, 'гость трансляции не создаёт');
 });
+
+test('меню: разделы, позиции с ценами, карточка с фото, возврат', async () => {
+  const { MENU } = await import('../lib/menu.js');
+  assert.equal(MENU.reduce((n, c) => n + c.items.length, 0), 64);
+  assert.ok(MENU.every((c) => c.items.every(([n, price, , img]) => n && price > 0 && img)));
+
+  const store = memStore();
+  const tg = fakeTg();
+  const ctx = makeCtx(new Date('2026-10-29T10:00:00Z'), tg, store);
+
+  await handleUpdate(msg(GUEST, '🍽 Меню'), ctx);
+  const root = tg.log.at(-1);
+  assert.ok(root.text.includes('Меню BOILER ROOM'));
+  const rootButtons = root.extra.reply_markup.inline_keyboard.flat().map((b) => b.callback_data);
+  assert.equal(rootButtons.filter((d) => d.startsWith('mc:')).length, MENU.length);
+
+  await handleUpdate(cb(GUEST, 'mc:0'), ctx);
+  const cat = tg.log.at(-1);
+  assert.ok(cat.text.includes('Краб камчатский вареный — <b>650 ₾</b>'));
+
+  await handleUpdate(cb(GUEST, 'mi:0.0'), ctx);
+  const card = tg.log.at(-1);
+  assert.equal(card.kind, 'photo');
+  assert.ok(card.text.includes('650 ₾'));
+
+  await handleUpdate(cb(GUEST, 'mi:99.99'), ctx); // несуществующая позиция не роняет бота
+  assert.ok(tg.log.at(-1).text.includes('Меню BOILER ROOM'));
+});

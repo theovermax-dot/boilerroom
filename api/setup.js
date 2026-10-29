@@ -22,6 +22,7 @@ export default async function handler(req, res) {
     commands: [
       { command: 'start', description: 'Главное меню' },
       { command: 'book', description: 'Забронировать стол' },
+      { command: 'menu', description: 'Меню' },
       { command: 'cancel', description: 'Отменить действие' },
     ],
   });

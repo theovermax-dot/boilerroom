@@ -29,6 +29,7 @@ const cmds = await api('setMyCommands', {
   commands: [
     { command: 'start', description: 'Главное меню' },
     { command: 'book', description: 'Забронировать стол' },
+    { command: 'menu', description: 'Меню' },
     { command: 'cancel', description: 'Отменить действие' },
   ],
 });
